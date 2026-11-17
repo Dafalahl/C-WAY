@@ -48,11 +48,27 @@ export default function CurveMap() {
 
       mapInstanceRef.current = map;
 
-      // Gunakan Tile ESRI World Street Map (100% Gratis, jernih & tanpa butuh API key)
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; OpenStreetMap contributors',
-        maxZoom: 19,
-      }).addTo(map);
+      // Tile Google Maps (Roadmap & Satelit Hybrid) — 100% Detail Lengkap sampai Zoom 20 tanpa API Key
+      const googleRoadmap = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps'
+      });
+
+      const googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps Satelit'
+      });
+
+      // Default aktifkan peta jalan Google
+      googleRoadmap.addTo(map);
+
+      // Pengontrol layer di pojok kanan atas (Peta Jalan vs Satelit)
+      L.control.layers({
+        'Peta Jalan': googleRoadmap,
+        'Citra Satelit': googleSatellite
+      }, undefined, { position: 'topright' }).addTo(map);
 
       // Custom icon Marker Node A (Blue)
       const iconA = L.divIcon({
