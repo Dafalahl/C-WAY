@@ -4,8 +4,8 @@ import { useEffect, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 
 const ACTIVE_CURVE = {
-  name: 'Tikungan Buta KM 14',
-  position: [-7.3592, 110.3340] as [number, number],
+  name: 'Tikungan Buta C-WAY',
+  position: [-7.489188, 110.218291] as [number, number],
 };
 
 export default function CurveMap() {
