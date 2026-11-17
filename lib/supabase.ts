@@ -11,16 +11,22 @@ export interface TrafficLog {
   status: 'AMAN' | 'WASPADA' | 'BAHAYA';
 }
 
+function cleanUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+}
+
 // Inisialisasi Supabase Client (bisa dari ENV atau localStorage)
 export function getSupabaseClient(): SupabaseClient | null {
   if (typeof window === 'undefined') {
-    const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const envUrl = cleanUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
     const envKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (envUrl && envKey) return createClient(envUrl, envKey);
     return null;
   }
 
-  const storedUrl = localStorage.getItem('cway_supabase_url') || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const rawUrl = localStorage.getItem('cway_supabase_url') || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const storedUrl = cleanUrl(rawUrl);
   const storedKey = localStorage.getItem('cway_supabase_key') || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (storedUrl && storedKey) {
