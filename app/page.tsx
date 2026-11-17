@@ -92,55 +92,6 @@ export default function DashboardPage() {
 
       {/* Main Content Dashboard */}
       <main className="max-w-7xl w-full mx-auto p-6 flex flex-col gap-6">
-        {/* LIVE STATUS BANNER TIKUNGAN (DENGAN TAHAN 5 DETIK SESUAI SARAN DOSEN) */}
-        {logs.length > 0 && (
-          <section className={`rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs transition-all ${
-            logs[0].status === 'BAHAYA'
-              ? 'bg-rose-50/90 border-rose-200 text-rose-900'
-              : logs[0].status === 'WASPADA'
-              ? 'bg-amber-50/90 border-amber-200 text-amber-900'
-              : 'bg-emerald-50/90 border-emerald-200 text-emerald-900'
-          }`}>
-            <div className="flex items-center gap-3">
-              <span className={`w-3.5 h-3.5 rounded-full shrink-0 ${
-                logs[0].status === 'BAHAYA'
-                  ? 'bg-rose-500 animate-ping'
-                  : logs[0].status === 'WASPADA'
-                  ? 'bg-amber-500 animate-pulse'
-                  : 'bg-emerald-500'
-              }`}></span>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider opacity-75">Status Tikungan Terakhir:</span>
-                  <span className="text-sm font-black tracking-wide font-mono px-2 py-0.5 rounded bg-white/70 border border-current">
-                    {logs[0].status}
-                  </span>
-                </div>
-                <p className="text-xs opacity-85 mt-0.5">
-                  {logs[0].status === 'BAHAYA' || logs[0].status === 'WASPADA'
-                    ? '⚠️ Peringatan Aktif: Sistem menahan status bahaya selama 5 detik (Clearance Time) saat mobil meliuk di tikungan.'
-                    : '🟢 Jalur Bebas: Tidak terdeteksi kendaraan berisiko di tikungan.'}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 text-xs font-mono shrink-0 bg-white/60 px-3 py-1.5 rounded-lg border border-current/20">
-              <div>
-                <span className="text-[10px] block opacity-60">JARAK OBJEK</span>
-                <span className="font-bold">{logs[0].distance_cm ? Number(logs[0].distance_cm).toFixed(1) : '0.0'} cm</span>
-              </div>
-              <div className="border-l border-current/20 pl-4">
-                <span className="text-[10px] block opacity-60">LAJU KECEPATAN</span>
-                <span className="font-bold">{logs[0].speed_kmh ? Number(logs[0].speed_kmh).toFixed(1) : '0.0'} km/jam</span>
-              </div>
-              <div className="border-l border-current/20 pl-4">
-                <span className="text-[10px] block opacity-60">SKOR RISIKO</span>
-                <span className="font-bold">{logs[0].risk_score ? Number(logs[0].risk_score).toFixed(1) : '0.0'}</span>
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* ROW 1: 3 KPI CARDS */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
