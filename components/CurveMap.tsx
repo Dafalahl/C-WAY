@@ -3,28 +3,9 @@
 import { useEffect, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 
-interface NodeInfo {
-  lat: number;
-  lng: number;
-  name: string;
-  role: string;
-}
-
 const ACTIVE_CURVE = {
-  name: 'Tikungan Buta KM 14 — Grabag, Magelang',
-  center: [-7.3592, 110.3340] as [number, number],
-  nodeA: {
-    lat: -7.3589,
-    lng: 110.3337,
-    name: 'Node A (Tiang Hulu)',
-    role: 'Sensor LiDAR Benewake & Edge AI ESP32'
-  },
-  nodeB: {
-    lat: -7.3595,
-    lng: 110.3343,
-    name: 'Node B (Tiang Hilir)',
-    role: 'Layar Peringatan OLED SSD1306 & ESP8266'
-  }
+  name: 'Tikungan Buta KM 14',
+  position: [-7.3592, 110.3340] as [number, number],
 };
 
 export default function CurveMap() {
@@ -44,7 +25,7 @@ export default function CurveMap() {
       const map = L.map(mapContainerRef.current, {
         zoomControl: true,
         scrollWheelZoom: false,
-      }).setView(ACTIVE_CURVE.center, 18);
+      }).setView(ACTIVE_CURVE.position, 18);
 
       mapInstanceRef.current = map;
 
@@ -70,58 +51,34 @@ export default function CurveMap() {
         'Citra Satelit': googleSatellite
       }, undefined, { position: 'topright' }).addTo(map);
 
-      // Custom icon Marker Node A (Blue)
-      const iconA = L.divIcon({
-        className: 'custom-pin-a',
-        html: `<div style="background:#0284c7; width:30px; height:30px; border-radius:50%; border:3px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:800; font-family:sans-serif;">A</div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+      // 1 Marker Tunggal yang merepresentasikan sistem 2 Node
+      const curveIcon = L.divIcon({
+        className: 'custom-curve-pin',
+        html: `
+          <div style="position:relative; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+            <div style="position:absolute; width:100%; height:100%; border-radius:50%; background:rgba(2, 132, 199, 0.25);"></div>
+            <div style="position:relative; width:28px; height:28px; border-radius:50%; background:#0284c7; border:3px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; color:white;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5.4 7.05 11.5 7.35 11.76a1 1 0 0 0 1.3 0C13 21.5 20 15.4 20 10a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+          </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18]
       });
 
-      // Custom icon Marker Node B (Purple)
-      const iconB = L.divIcon({
-        className: 'custom-pin-b',
-        html: `<div style="background:#8b5cf6; width:30px; height:30px; border-radius:50%; border:3px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:800; font-family:sans-serif;">B</div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
-      });
-
-      // Tambahkan Marker Node A
-      const markerA = L.marker([ACTIVE_CURVE.nodeA.lat, ACTIVE_CURVE.nodeA.lng], { icon: iconA }).addTo(map);
-      markerA.bindPopup(`
-        <div style="font-family:sans-serif; font-size:12px; line-height:1.4;">
-          <b style="color:#0284c7; font-size:13px;">${ACTIVE_CURVE.nodeA.name}</b><br/>
-          <span style="color:#10b981; font-weight:700;">● STATUS: ONLINE</span><br/>
-          ${ACTIVE_CURVE.nodeA.role}
+      const marker = L.marker(ACTIVE_CURVE.position, { icon: curveIcon }).addTo(map);
+      marker.bindPopup(`
+        <div style="font-family:sans-serif; font-size:12px; line-height:1.5; min-width:210px;">
+          <b style="color:#0f172a; font-size:13px;">${ACTIVE_CURVE.name}</b><br/>
+          <span style="color:#10b981; font-weight:700;">● SISTEM AKTIF (TERINTEGRASI)</span><br/>
+          <div style="margin-top:6px; padding-top:6px; border-top:1px solid #e2e8f0; color:#475569; font-size:11px;">
+            <b>Node A (Hulu):</b> Sensor LiDAR & Edge AI ESP32<br/>
+            <b>Node B (Hilir):</b> Layar Peringatan OLED & ESP8266<br/>
+            <b>Jaringan:</b> LoRa P2P 433 MHz
+          </div>
         </div>
       `).openPopup();
-
-      // Tambahkan Marker Node B
-      const markerB = L.marker([ACTIVE_CURVE.nodeB.lat, ACTIVE_CURVE.nodeB.lng], { icon: iconB }).addTo(map);
-      markerB.bindPopup(`
-        <div style="font-family:sans-serif; font-size:12px; line-height:1.4;">
-          <b style="color:#8b5cf6; font-size:13px;">${ACTIVE_CURVE.nodeB.name}</b><br/>
-          <span style="color:#10b981; font-weight:700;">● STATUS: ONLINE</span><br/>
-          ${ACTIVE_CURVE.nodeB.role}
-        </div>
-      `);
-
-      // Garis Putus-putus Nirkabel LoRa 433 MHz Menembus Tebing
-      const loraLine = L.polyline([
-        [ACTIVE_CURVE.nodeA.lat, ACTIVE_CURVE.nodeA.lng],
-        [ACTIVE_CURVE.nodeB.lat, ACTIVE_CURVE.nodeB.lng]
-      ], {
-        color: '#f59e0b',
-        weight: 3,
-        dashArray: '6, 6',
-        opacity: 0.85
-      }).addTo(map);
-
-      loraLine.bindTooltip("Koneksi Nirkabel LoRa 433 MHz (Tembus Tebing)", {
-        permanent: true,
-        direction: 'center',
-        className: 'lora-tooltip'
-      });
     });
 
     return () => {

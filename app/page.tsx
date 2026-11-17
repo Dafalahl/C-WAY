@@ -142,25 +142,11 @@ export default function DashboardPage() {
 
         {/* ROW 2: PETA TIKUNGAN AKTIF (FULL WIDTH) */}
         <section className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex flex-col gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-sky-600 shrink-0" />
-              <h2 className="text-sm font-bold text-slate-800">
-                Peta Monitoring Lokasi — Tikungan Buta Aktif (Grabag, Magelang)
-              </h2>
-            </div>
-
-            {/* Badges Node yang Aktif di Peta */}
-            <div className="flex items-center gap-2 text-xs">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 font-medium text-slate-700">
-                <span className="w-2 h-2 rounded-full bg-sky-500"></span>
-                <span>Node A (LiDAR): <b className="text-emerald-600">ONLINE</b></span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 font-medium text-slate-700">
-                <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                <span>Node B (OLED): <b className="text-emerald-600">ONLINE</b></span>
-              </div>
-            </div>
+          <div className="flex items-center gap-2 px-1">
+            <MapPin className="w-4 h-4 text-sky-600 shrink-0" />
+            <h2 className="text-sm font-bold text-slate-800">
+              Peta Monitoring Lokasi — Tikungan Buta Aktif
+            </h2>
           </div>
 
           <CurveMap />
