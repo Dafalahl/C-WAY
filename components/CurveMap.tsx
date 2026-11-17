@@ -48,11 +48,10 @@ export default function CurveMap() {
 
       mapInstanceRef.current = map;
 
-      // Gunakan Tile CartoDB Voyager yang bebas dari blokir 403
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20,
+      // Gunakan Tile ESRI World Street Map (100% Gratis, jernih & tanpa butuh API key)
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; OpenStreetMap contributors',
+        maxZoom: 19,
       }).addTo(map);
 
       // Custom icon Marker Node A (Blue)
