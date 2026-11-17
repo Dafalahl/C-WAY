@@ -19,11 +19,15 @@ const CurveMap = dynamic(() => import('@/components/CurveMap'), {
 
 export default function DashboardPage() {
   const [logs, setLogs] = useState<TrafficLog[]>([]);
+  const [dbStatus, setDbStatus] = useState<'loading' | 'connected' | 'error'>('loading');
 
   // Inisialisasi Supabase & Fetch Riwayat Awal
   const initSupabase = async () => {
     const client = getSupabaseClient();
-    if (!client) return;
+    if (!client) {
+      setDbStatus('error');
+      return;
+    }
 
     // 1. Ambil log terakhir dari Supabase untuk data mining
     try {
@@ -33,11 +37,16 @@ export default function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching logs from Supabase:', error);
+        setDbStatus('error');
+      } else if (data) {
         setLogs(data as TrafficLog[]);
+        setDbStatus('connected');
       }
     } catch (e) {
-      console.error('Error fetching logs from Supabase:', e);
+      console.error('Exception fetching logs from Supabase:', e);
+      setDbStatus('error');
     }
 
     // 2. Realtime Listener untuk Data Baru yang Masuk dari ESP32
@@ -49,6 +58,7 @@ export default function DashboardPage() {
         (payload) => {
           const newRow = payload.new as TrafficLog;
           setLogs((prev) => [newRow, ...prev.slice(0, 49)]);
+          setDbStatus('connected');
         }
       )
       .subscribe();
@@ -88,8 +98,15 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-2.5">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-slate-50">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-slate-700">1 Tikungan Aktif Mencari Data</span>
+            <span className={`w-2 h-2 rounded-full ${dbStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : dbStatus === 'error' ? 'bg-rose-500' : 'bg-amber-500 animate-pulse'}`}></span>
+            <span className="text-slate-700">
+              {dbStatus === 'connected' ? `Supabase: Terhubung (${logs.length} Log)` : dbStatus === 'error' ? 'Supabase: Terputus' : 'Menghubungkan Supabase...'}
+            </span>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-slate-50">
+            <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+            <span className="text-slate-700">1 Tikungan Aktif</span>
           </div>
         </div>
       </header>
