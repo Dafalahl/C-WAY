@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Database, MapPin, Gauge, ShieldAlert } from 'lucide-react';
-import { TrafficLog, getSupabaseClient } from '@/lib/supabase';
+import { TrafficLog } from '@/lib/supabase';
 import DataMiningTable from '@/components/DataMiningTable';
 import DataMiningChart from '@/components/DataMiningChart';
 
@@ -21,51 +21,30 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<TrafficLog[]>([]);
   const [dbStatus, setDbStatus] = useState<'loading' | 'connected' | 'error'>('loading');
 
-  // Inisialisasi Supabase & Fetch Riwayat Awal
-  const initSupabase = async () => {
-    const client = getSupabaseClient();
-    if (!client) {
-      setDbStatus('error');
-      return;
-    }
-
-    // 1. Ambil log terakhir dari Supabase untuk data mining
+  // Fetch data logs dari API Server Route (menghindari error Supabase key di browser)
+  const fetchLogs = async () => {
     try {
-      const { data, error } = await client
-        .from('traffic_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) {
-        console.error('Error fetching logs from Supabase:', error);
-        setDbStatus('error');
-      } else if (data) {
-        setLogs(data as TrafficLog[]);
-        setDbStatus('connected');
+      const res = await fetch('/api/traffic', { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.logs && Array.isArray(json.logs)) {
+          setLogs(json.logs);
+          setDbStatus('connected');
+          return;
+        }
       }
+      setDbStatus('error');
     } catch (e) {
-      console.error('Exception fetching logs from Supabase:', e);
+      console.error('Failed to fetch from /api/traffic:', e);
       setDbStatus('error');
     }
-
-    // 2. Realtime Listener untuk Data Baru yang Masuk dari ESP32
-    client
-      .channel('realtime:traffic_logs')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'traffic_logs' },
-        (payload) => {
-          const newRow = payload.new as TrafficLog;
-          setLogs((prev) => [newRow, ...prev.slice(0, 49)]);
-          setDbStatus('connected');
-        }
-      )
-      .subscribe();
   };
 
   useEffect(() => {
-    initSupabase();
+    fetchLogs();
+    // Auto-refresh setiap 2 detik untuk data real-time saat ESP32 mengunggah log baru
+    const interval = setInterval(fetchLogs, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   // Perhitungan Ringkasan Data Mining
